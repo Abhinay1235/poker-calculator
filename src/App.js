@@ -73,7 +73,7 @@ class App extends React.Component {
     else {
       let sGameDetails = {
         gameLocation: sGameLocation,
-        date: 'Today',
+        date: this.state.date.toString(),
         startChipCount: parseInt(sStartChipCount),
         chipValue: parseInt(sChipValue)
       };
@@ -389,44 +389,51 @@ class App extends React.Component {
         
         {/* Home screen for starting game */}
         
-        <section className={'col-xs-12 col-sm-6 offset-sm-3 game-section game-start-section ' + (this.state.visibleSection == 'game-start' ? 'd-inline-block' : 'd-none')}>
-          <div className="input-group">
-            <div className="input-group-prepend">
-              <span className="input-group-text">Enter Game location</span>
+        <div className={'row game-section game-start-section ' + (this.state.visibleSection == 'game-start' ? 'd-block' : 'd-none')}>
+          <div className="col-xs-12 col-sm-9 col-md-6 offset-sm-1 offset-md-3">
+            <div className="input-group">
+              <div className="input-group-prepend">
+                <span className="input-group-text">Enter Game location</span>
+              </div>
+              <input type="text" className="form-control" value={this.state.gameLocation} onChange={this.gameLocationChanged} required/>
             </div>
-            <input type="text" className="form-control" value={this.state.gameLocation} onChange={this.gameLocationChanged} required/>
-          </div>
-          <div className="input-group">
-            <div className="input-group-prepend">
-              <span className="input-group-text">Start Chip count</span>
+            <div className="input-group">
+              <div className="input-group-prepend">
+                <span className="input-group-text">Start Chip count</span>
+              </div>
+              <input type="text" className="form-control" value={this.state.startChipCount} onChange={this.startChipCountChanged} />
             </div>
-            <input type="text" className="form-control" value={this.state.startChipCount} onChange={this.startChipCountChanged} />
-          </div>
 
-          <div className="input-group">
-            <div className="input-group-prepend">
-              <span className="input-group-text">Game Chip value</span>
+            <div className="input-group">
+              <div className="input-group-prepend">
+                <span className="input-group-text">Game Chip value</span>
+              </div>
+              <input type="text" className="form-control" value={this.state.chipValue} onChange={this.chipValueChanged} />
             </div>
-            <input type="text" className="form-control" value={this.state.chipValue} onChange={this.chipValueChanged} />
+
+            <div>
+              <span>Game Date: </span> <span>{this.state.date.toString()}</span>
+            </div>
+
+
+
+            <button className="btn btn-primary" onClick={this.startNewGame}>Start Game</button>
           </div>
-
-          <div>
-            <span>Game Date: </span> <span>Today</span>
-          </div>
-
-
-
-          <button className="btn btn-primary" onClick={this.startNewGame}>Start Game</button>
-        </section>
+        </div>
 
         {/* End of Home section */}
-        <section className={'game-section game-add-player-section ' + (this.state.visibleSection == 'add-players' ? 'd-inline-block' : 'd-none')}>
-            <div className="col-xs-12 col-sm-6">
-              <span onClick={this.showAddPlayerSection}>Add Player  </span>
-              <span onClick={this.showAddBuyinSection}>Add buyin  </span>
-              <span onClick={this.showFinalPayoutSection}>Payout  </span>
+
+
+        <div className={'row game-section game-add-player-section ' + (this.state.visibleSection == 'add-players' ? 'd-block' : 'd-none')}>
+          <div className="col-xs-12 col-sm-9 col-md-6 offset-sm-1 offset-md-3"> 
+
+            <div className="row"><div className="col-xs-12 col-sm-9 col-md-6">
+              <div className="btn btn-primary"  onClick={this.showAddPlayerSection}>Manage Players  </div>
+              <div className="btn btn-primary" onClick={this.showAddBuyinSection}>Manage Buyins  </div>
+              <div className="btn btn-primary" onClick={this.showFinalPayoutSection}>Payouts  </div>
             </div>
-            <div className="col-xs-12 col-sm-6">
+            
+            <div className="col-xs-12 col-sm-9 col-md-6">
               <div className="input-group">
                 <div className="input-group-prepend">
                   <span className="input-group-text">Enter Player name</span>
@@ -442,45 +449,49 @@ class App extends React.Component {
               </div>
 
               <button className="btn btn-primary" onClick={this.addNewPlayer}>Add New player</button>
-            </div>
+            </div></div>
 
             
-            <hr/>
+            <div className="row"><div className="col-xs-12">              
+              <h3>Delete players</h3>
+              <select className="form-control" value={this.state.deletePlayer} onChange={this.deletePlayerChanged}>
+              {deletePlayer}
+              </select>
+              <button className="btn btn-primary" onClick={this.deletePlayer}>Delete Player</button>
 
-            <h3>Delete players</h3>
-            <select className="form-control" value={this.state.deletePlayer} onChange={this.deletePlayerChanged}>
-             {deletePlayer}
+
+              <div className='col-xs-12 col-sm-6'>
+                <h3>Players list</h3>
+                <ul>{Player}</ul>              
+              </div>
+            </div></div>
+
+          </div>
+        </div>
+
+        <div className={'row game-section game-add-buyin-section ' + (this.state.visibleSection == 'add-buyin' ? 'd-block' : 'd-none')}>
+          <div className="col-xs-12 col-sm-9 col-md-6">
+            <select className="form-control" value={this.state.selectedPlayer} onChange={this.selectedPlayerChanged}>
+              {deletePlayer}
             </select>
-            <button className="btn btn-primary" onClick={this.deletePlayer}>Delete Player</button>
+
+            <button className="btn btn-primary" onClick={() => this.editBuyin('add')}>Add Buyin</button>
+            <button className="btn btn-primary" onClick={() => this.editBuyin('remove')}>Remove Buyin</button>
 
 
-            <div className='col-xs-12 col-sm-6'>
-              <h3>Players list</h3>
-              <ul>{Player}</ul>              
-            </div>
+            <hr />
+            <h3>Buyins count of each player</h3>  
+            <ul>{TotalPlayerBuyins}</ul>
+          </div>
+        </div>
 
+        <div className={'row game-section game-final-payout-section ' + (this.state.visibleSection == 'final-payout' ? 'd-block' : 'd-none')}>
+          <div className="col-xs-12 col-sm-9 col-md-6"> 
+            {finalPlayerInfo}
 
-        </section>
-
-        <section className={'col-xs-12 col-sm-6 offset-sm-3 game-section game-add-buyin-section ' + (this.state.visibleSection == 'add-buyin' ? 'd-inline-block' : 'd-none')}>
-          <select className="form-control" value={this.state.selectedPlayer} onChange={this.selectedPlayerChanged}>
-             {deletePlayer}
-          </select>
-
-          <button className="btn btn-primary" onClick={() => this.editBuyin('add')}>Add Buyin</button>
-          <button className="btn btn-primary" onClick={() => this.editBuyin('remove')}>Remove Buyin</button>
-
-
-          <hr />
-          <h3>Buyins count of each player</h3>  
-          <ul>{TotalPlayerBuyins}</ul>
-        </section>
-
-        <section className={'col-xs-12 col-sm-6 offset-sm-3 game-section game-final-payout-section ' + (this.state.visibleSection == 'final-payout' ? 'd-inline-block' : 'd-none')}>
-          {finalPlayerInfo}
-
-          <button className="btn btn-primary" onClick={this.calculatePayouts}>Calculate</button>
-        </section>
+            <button className="btn btn-primary" onClick={this.calculatePayouts}>Calculate</button>
+          </div>
+        </div>
       </div>
     );
   }
