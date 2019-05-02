@@ -9,10 +9,10 @@ class App extends React.Component {
     super(props);
     this.state = {
       date: new Date(),
-      gameLocation: 'Enter Game Location',
-      startChipCount: 100,
-      initialChipCount: 0,
-      chipValue: 0.5,
+      gameLocation: '',
+      startChipCount: 0,
+      initialChipCount: 100,
+      chipValue: 0,
       visibleSection: 'game-start',
       newPlayerName: '',
       deletePlayer:'',
@@ -57,16 +57,30 @@ class App extends React.Component {
 
   startNewGame = () => {
     
-    let sGameDetails = {
-      gameLocation: this.state.gameLocation,
-      date: 'Today',
-      startChipCount: this.state.startChipCount,
-      chipValue: this.state.chipValue
-    };
+    const sGameLocation = this.state.gameLocation;
+    const sStartChipCount = this.state.startChipCount;
+    const sChipValue = this.state.chipValue;
 
-    let sInitialchipCount = parseInt(this.state.startChipCount);
-    this.setState({visibleSection: 'add-players', initialChipCount: sInitialchipCount});
-    localStorage.setItem('gameDetails', JSON.stringify(sGameDetails));
+    if(sGameLocation.length <= 0) {
+      alert("Please provide Game location");
+    }
+    else if(parseInt(sStartChipCount) <= 0){
+      alert("Please provide start chip count greater than Zero.");
+    }
+    else if(parseInt(sChipValue) <=0 ){
+      alert("Please provide start chip count greater than Zero.");
+    }
+    else {
+      let sGameDetails = {
+        gameLocation: sGameLocation,
+        date: 'Today',
+        startChipCount: parseInt(sStartChipCount),
+        chipValue: parseInt(sChipValue)
+      };
+  
+      this.setState({visibleSection: 'add-players'});
+      localStorage.setItem('gameDetails', JSON.stringify(sGameDetails));
+    }    
     
   }
 
@@ -372,18 +386,15 @@ class App extends React.Component {
     return (
       <div className="App container-fluid">
 
-        <div> 
-          <span onClick={this.showAddPlayerSection}>Add Player  </span>
-          <span onClick={this.showAddBuyinSection}>Add buyin  </span>
-          <span onClick={this.showFinalPayoutSection}>Payout  </span>
-        </div>
+        
+        {/* Home screen for starting game */}
         
         <section className={'col-xs-12 col-sm-6 offset-sm-3 game-section game-start-section ' + (this.state.visibleSection == 'game-start' ? 'd-inline-block' : 'd-none')}>
           <div className="input-group">
             <div className="input-group-prepend">
               <span className="input-group-text">Enter Game location</span>
             </div>
-            <input type="text" className="form-control" value={this.state.gameLocation} onChange={this.gameLocationChanged} />
+            <input type="text" className="form-control" value={this.state.gameLocation} onChange={this.gameLocationChanged} required/>
           </div>
           <div className="input-group">
             <div className="input-group-prepend">
@@ -407,8 +418,14 @@ class App extends React.Component {
 
           <button className="btn btn-primary" onClick={this.startNewGame}>Start Game</button>
         </section>
-        <section className={'col-xs-12 col-sm-6 offset-sm-3 game-section game-add-player-section ' + (this.state.visibleSection == 'add-players' ? 'd-inline-block' : 'd-none')}>
 
+        {/* End of Home section */}
+        <section className={'game-section game-add-player-section ' + (this.state.visibleSection == 'add-players' ? 'd-inline-block' : 'd-none')}>
+            <div className="col-xs-12 col-sm-6">
+              <span onClick={this.showAddPlayerSection}>Add Player  </span>
+              <span onClick={this.showAddBuyinSection}>Add buyin  </span>
+              <span onClick={this.showFinalPayoutSection}>Payout  </span>
+            </div>
             <div className="col-xs-12 col-sm-6">
               <div className="input-group">
                 <div className="input-group-prepend">
