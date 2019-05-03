@@ -1,7 +1,8 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 
+import Alert from 'react-s-alert';
+import 'react-s-alert/dist/s-alert-default.css';
 
 
 class App extends React.Component {
@@ -11,7 +12,6 @@ class App extends React.Component {
       date: new Date(),
       gameLocation: '',
       startChipCount: 0,
-      initialChipCount: 100,
       chipValue: 0,
       visibleSection: 'game-start',
       newPlayerName: '',
@@ -37,13 +37,15 @@ class App extends React.Component {
 
     sPlayers.forEach(item => {
       if(sPlayerSelected == item.player_name) {
-        if(option == 'add') {
-          item.later_buyins = item.later_buyins + 1;
-          sTotalInitialChipsTaken = sTotalInitialChipsTaken +  parseInt(this.state.startChipCount);
+        if(option == 'remove') {
+          if(item.later_buyins > 0){
+            item.later_buyins = item.later_buyins - 1;
+          }          
+          sTotalInitialChipsTaken = sTotalInitialChipsTaken -  parseInt(this.state.startChipCount);
         }
         else {
-          item.later_buyins = item.later_buyins - 1;
-          sTotalInitialChipsTaken = sTotalInitialChipsTaken -  parseInt(this.state.startChipCount);
+          item.later_buyins = item.later_buyins + 1;
+          sTotalInitialChipsTaken = sTotalInitialChipsTaken +  parseInt(this.state.startChipCount);
         }
         
       }
@@ -58,27 +60,27 @@ class App extends React.Component {
   startNewGame = () => {
     
     const sGameLocation = this.state.gameLocation;
-    const sStartChipCount = this.state.startChipCount;
-    const sChipValue = this.state.chipValue;
+    const sStartChipCount = parseInt(this.state.startChipCount);
+    const sChipValue = parseFloat(this.state.chipValue);
 
     if(sGameLocation.length <= 0) {
       alert("Please provide Game location");
     }
-    else if(parseInt(sStartChipCount) <= 0){
+    else if(sStartChipCount <= 0){
       alert("Please provide start chip count greater than Zero.");
     }
-    else if(parseInt(sChipValue) <=0 ){
-      alert("Please provide start chip count greater than Zero.");
+    else if(sChipValue <=0 ){
+      alert("Please provide Game Chip Value greater than Zero.");
     }
     else {
       let sGameDetails = {
         gameLocation: sGameLocation,
         date: this.state.date.toString(),
-        startChipCount: parseInt(sStartChipCount),
-        chipValue: parseInt(sChipValue)
+        startChipCount: sStartChipCount,
+        chipValue: sChipValue
       };
   
-      this.setState({visibleSection: 'add-players'});
+      this.setState({visibleSection: 'game-progress'});
       localStorage.setItem('gameDetails', JSON.stringify(sGameDetails));
     }    
     
@@ -91,13 +93,13 @@ class App extends React.Component {
     let sTotalInitialChipsTaken =  parseInt(this.state.totalChipsTaken);
     let sPlayerInfo = {
       player_name: sNewPlayerName,
-      initial_chips:  parseInt(this.state.initialChipCount),
+      initial_chips:  parseInt(this.state.startChipCount),
       later_buyins: 0,
       final_count: 0,
       chipsWon: null
     }
 
-    sTotalInitialChipsTaken = sTotalInitialChipsTaken +  parseInt(this.state.initialChipCount);
+    sTotalInitialChipsTaken = sTotalInitialChipsTaken +  parseInt(this.state.startChipCount);
     if(sPlayersList.indexOf(sNewPlayerName) > -1) {
       alert('Player already registered');
     }
@@ -114,16 +116,18 @@ class App extends React.Component {
     let sDeletePlayerName = this.state.deletePlayer;
     let sPlayers = this.state.players;
     let sPlayersList = this.state.playersList;
+    let sTotalInitialChipsTaken =  parseInt(this.state.totalChipsTaken);
 
     for(var i=0; i<sPlayers.length; i++) {
       if(sDeletePlayerName == sPlayers[i].player_name) {
+        sTotalInitialChipsTaken = sTotalInitialChipsTaken - (sPlayers[i].initial_chips + (sPlayers[i].later_buyins * parseInt(this.state.startChipCount)));
         sPlayers.splice(i,1);
       }
     }
     
     const sPlayersListFiltered = sPlayersList.filter(item => item !== sDeletePlayerName);
 
-    this.setState({players: sPlayers, playersList: sPlayersListFiltered});
+    this.setState({players: sPlayers, playersList: sPlayersListFiltered, totalChipsTaken: sTotalInitialChipsTaken});
 
     localStorage.setItem('players', JSON.stringify(sPlayers));
 
@@ -215,6 +219,7 @@ class App extends React.Component {
 
           if((playerB.chips_lost * this.state.chipValue) > 0) {
             console.log(playerB.player_name + ' pays ' + (playerB.chips_lost * this.state.chipValue) + ' to ' + playerA.player_name);
+            Alert.success(playerB.player_name + ' pays ' + (playerB.chips_lost * this.state.chipValue) + ' to ' + playerA.player_name);
           }          
 
           playerA.chips_won = playerA.chips_won - playerB.chips_lost;
@@ -233,6 +238,7 @@ class App extends React.Component {
   
             if((playerB.chips_lost * this.state.chipValue) > 0){
               console.log(playerB.player_name + ' pays ' + (playerB.chips_lost * this.state.chipValue) + ' to ' + playerA.player_name); 
+              Alert.success(playerB.player_name + ' pays ' + (playerB.chips_lost * this.state.chipValue) + ' to ' + playerA.player_name);
             }
             
             playerA.chips_won = 0;
@@ -251,6 +257,7 @@ class App extends React.Component {
 
             if((playerA.chips_won * this.state.chipValue) > 0) {
               console.log(playerB.player_name + ' pays ' + (playerA.chips_won * this.state.chipValue) + ' to ' + playerA.player_name);
+              Alert.success(playerB.player_name + ' pays ' + (playerA.chips_won * this.state.chipValue) + ' to ' + playerA.player_name);
             }
             
             playerB.chips_lost = playerB.chips_lost - playerA.chips_won;    
@@ -264,11 +271,6 @@ class App extends React.Component {
       })
 
     }
-
-  }
-
-  adjustPayout = (profitPlayer, loosersArray) => {
-
 
   }
 
@@ -301,18 +303,6 @@ class App extends React.Component {
     return comparison;
   }
 
-
-  showAddPlayerSection = () => {
-    this.setState({visibleSection: 'add-players'});
-  }
-
-  showAddBuyinSection = () => {
-    this.setState({visibleSection: 'add-buyin'});
-  }
-
-  showFinalPayoutSection = () => {
-    this.setState({visibleSection: 'final-payout'});
-  }
 
   gameLocationChanged = (event) => {
     this.setState({gameLocation: event.target.value});
@@ -355,10 +345,6 @@ class App extends React.Component {
    
   }
 
-  
-  initialChipCountChanged = (event) => {
-    this.setState({initialChipCount: event.target.value});
-  }
 
   render() {
 
@@ -384,16 +370,39 @@ class App extends React.Component {
     }, this);
 
     return (
-      <div className="App container-fluid">
+      <div className="App">
 
-        
+      <nav className="navbar navbar-expand-lg navbar-dark bg-primary sticky-top ">
+        <a className="navbar-brand" href="#">Poker Payouts Calculator</a>
+        <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span className="navbar-toggler-icon"></span>
+        </button>
+        {/*<div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="navbar-nav">
+            <li className="nav-item active">
+              <a className="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li className="nav-item">
+              <a className="nav-link" href="#">Features</a>
+            </li>
+            <li className="nav-item">
+              <a className="nav-link" href="#">Pricing</a>
+            </li>
+            <li className="nav-item">
+              <a className="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+            </li>
+          </ul>
+        </div>*/}
+      </nav>
+      <div className="container-fluid">
+        <Alert stack={true}  effect='stackslide' position='top' timeout='none'/>
         {/* Home screen for starting game */}
         
-        <div className={'row game-section game-start-section ' + (this.state.visibleSection == 'game-start' ? 'd-block' : 'd-none')}>
-          <div className="col-xs-12 col-sm-9 col-md-6 offset-sm-1 offset-md-3">
+        <div className={'row game-section game-start-section ' + (this.state.visibleSection == 'game-start' ? '' : 'd-none')}>
+          <div className="col-12">
             <div className="input-group">
               <div className="input-group-prepend">
-                <span className="input-group-text">Enter Game location</span>
+                <span className="input-group-text" >Enter Game location</span>
               </div>
               <input type="text" className="form-control" value={this.state.gameLocation} onChange={this.gameLocationChanged} required/>
             </div>
@@ -415,84 +424,96 @@ class App extends React.Component {
               <span>Game Date: </span> <span>{this.state.date.toString()}</span>
             </div>
 
-
-
-            <button className="btn btn-primary" onClick={this.startNewGame}>Start Game</button>
+            <button type="button" className="btn btn-primary" onClick={this.startNewGame}> Start Game</button>
           </div>
         </div>
 
         {/* End of Home section */}
 
+        {/* Game Started section */}
+        <div className={'row game-section game-progress-section ' + (this.state.visibleSection == 'game-progress' ? '' : 'd-none')}>
+          
+          <div className="col-12 ">
 
-        <div className={'row game-section game-add-player-section ' + (this.state.visibleSection == 'add-players' ? 'd-block' : 'd-none')}>
-          <div className="col-xs-12 col-sm-9 col-md-6 offset-sm-1 offset-md-3"> 
+            <ul className="nav nav-tabs" id="pills-tab" role="tablist">
+              <li className="nav-item">
+                <a className="nav-link active" id="pills-manage-players-tab" data-toggle="pill" href="#pills-manage-players" role="tab" aria-controls="pills-manage-players" aria-selected="true">Players</a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" id="pills-manage-buyins-tab" data-toggle="pill" href="#pills-manage-buyins" role="tab" aria-controls="pills-manage-buyins" aria-selected="false">Buyins</a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" id="pills-payouts-tab" data-toggle="pill" href="#pills-payouts" role="tab" aria-controls="pills-payouts" aria-selected="false">Payouts</a>
+              </li>
+            </ul>
 
-            <div className="row"><div className="col-xs-12 col-sm-9 col-md-6">
-              <div className="btn btn-primary"  onClick={this.showAddPlayerSection}>Manage Players  </div>
-              <div className="btn btn-primary" onClick={this.showAddBuyinSection}>Manage Buyins  </div>
-              <div className="btn btn-primary" onClick={this.showFinalPayoutSection}>Payouts  </div>
+            <div className="tab-content" id="pills-tabContent">
+              <div className="tab-pane fade show active" id="pills-manage-players" role="tabpanel" aria-labelledby="pills-manage-players-tab">
+                                  
+                <div className="row">                  
+                  <div className="col-12">
+
+                    <div className="input-group">
+                      <input type="text" className="form-control" value={this.state.newPlayerName} onChange={this.playerNameChanged} placeholder="Enter player name" aria-label="Player name" aria-describedby="button-addon2" />
+                      <div className="input-group-append">
+                        <button className="btn btn-primary" type="button" id="button-addon2" onClick={this.addNewPlayer}>Add Player</button>
+                      </div>
+                    </div>
+
+                    <div className="input-group">
+                      <select className="custom-select" aria-label="Delete player" value={this.state.deletePlayer} onChange={this.deletePlayerChanged}>
+                        <option selected>Choose Player...</option>
+                        {deletePlayer}
+                      </select>
+                      <div className="input-group-append">
+                        <button className="btn btn-danger" type="button" onClick={this.deletePlayer} >Delete Player</button>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <div className='col-12'>
+                      <h3>Players list</h3>
+                      <ol>{Player}</ol>              
+                  </div>
+                </div>
+              </div>
+
+
+              <div className="tab-pane fade" id="pills-manage-buyins" role="tabpanel" aria-labelledby="pills-manage-buyins-tab">
+                
+                <div className="col-12">
+                  <div className="input-group">
+                    <select className="custom-select" aria-label="Manage Buyin" value={this.state.selectedPlayer} onChange={this.selectedPlayerChanged}>
+                      <option selected>Choose player...</option>
+                      {deletePlayer}
+                    </select>
+                    <div className="input-group-append" id="button-addon3">
+                      <button className="btn btn-primary" type="button" onClick={() => this.editBuyin('add')} ></button>
+                      <button className="btn btn-danger" type="button" onClick={() => this.editBuyin('remove')}></button>
+                    </div>                  
+                  </div>
+                </div>
+
+                <div className='col-12'>
+                  <h3>Buyins count of each player</h3>
+                  <ul>{TotalPlayerBuyins}</ul>              
+                </div>
+              </div>
+
+              <div className="tab-pane fade" id="pills-payouts" role="tabpanel" aria-labelledby="pills-payouts-tab">
+                {finalPlayerInfo}
+
+                <button className="btn btn-primary" onClick={this.calculatePayouts}>Calculate</button>
+              </div>
             </div>
-            
-            <div className="col-xs-12 col-sm-9 col-md-6">
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <span className="input-group-text">Enter Player name</span>
-                </div>
-                <input type="text" className="form-control" value={this.state.newPlayerName} onChange={this.playerNameChanged} />
-              </div>
-
-              <div className="input-group">
-                <div className="input-group-prepend">
-                  <span className="input-group-text">Initial Chips</span>
-                </div>
-                <input type="text" className="form-control" value={this.state.initialChipCount} onChange={this.initialChipCountChanged} />
-              </div>
-
-              <button className="btn btn-primary" onClick={this.addNewPlayer}>Add New player</button>
-            </div></div>
-
-            
-            <div className="row"><div className="col-xs-12">              
-              <h3>Delete players</h3>
-              <select className="form-control" value={this.state.deletePlayer} onChange={this.deletePlayerChanged}>
-              {deletePlayer}
-              </select>
-              <button className="btn btn-primary" onClick={this.deletePlayer}>Delete Player</button>
-
-
-              <div className='col-xs-12 col-sm-6'>
-                <h3>Players list</h3>
-                <ul>{Player}</ul>              
-              </div>
-            </div></div>
-
           </div>
+
+
         </div>
 
-        <div className={'row game-section game-add-buyin-section ' + (this.state.visibleSection == 'add-buyin' ? 'd-block' : 'd-none')}>
-          <div className="col-xs-12 col-sm-9 col-md-6">
-            <select className="form-control" value={this.state.selectedPlayer} onChange={this.selectedPlayerChanged}>
-              {deletePlayer}
-            </select>
-
-            <button className="btn btn-primary" onClick={() => this.editBuyin('add')}>Add Buyin</button>
-            <button className="btn btn-primary" onClick={() => this.editBuyin('remove')}>Remove Buyin</button>
-
-
-            <hr />
-            <h3>Buyins count of each player</h3>  
-            <ul>{TotalPlayerBuyins}</ul>
-          </div>
-        </div>
-
-        <div className={'row game-section game-final-payout-section ' + (this.state.visibleSection == 'final-payout' ? 'd-block' : 'd-none')}>
-          <div className="col-xs-12 col-sm-9 col-md-6"> 
-            {finalPlayerInfo}
-
-            <button className="btn btn-primary" onClick={this.calculatePayouts}>Calculate</button>
-          </div>
-        </div>
       </div>
+      </div>  
     );
   }
 
