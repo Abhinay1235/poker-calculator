@@ -35,24 +35,29 @@ class App extends React.Component {
     let sPlayers = this.state.players;
     let sTotalInitialChipsTaken = parseInt(this.state.totalChipsTaken);
 
-    sPlayers.forEach(item => {
-      if(sPlayerSelected == item.player_name) {
-        if(option == 'remove') {
-          if(item.later_buyins > 0){
-            item.later_buyins = item.later_buyins - 1;
-          }          
-          sTotalInitialChipsTaken = sTotalInitialChipsTaken -  parseInt(this.state.startChipCount);
+    if(sPlayerSelected.length < 1) {
+      alert('Select a player');
+    }
+    else {
+      sPlayers.forEach(item => {
+        if(sPlayerSelected == item.player_name) {
+          if(option == 'remove') {
+            if(item.later_buyins > 0){
+              item.later_buyins = item.later_buyins - 1;
+            }          
+            sTotalInitialChipsTaken = sTotalInitialChipsTaken -  parseInt(this.state.startChipCount);
+          }
+          else {
+            item.later_buyins = item.later_buyins + 1;
+            sTotalInitialChipsTaken = sTotalInitialChipsTaken +  parseInt(this.state.startChipCount);
+          }
+          
         }
-        else {
-          item.later_buyins = item.later_buyins + 1;
-          sTotalInitialChipsTaken = sTotalInitialChipsTaken +  parseInt(this.state.startChipCount);
-        }
-        
-      }
-    });
-
-    this.setState({players: sPlayers, totalChipsTaken: sTotalInitialChipsTaken});
-    localStorage.setItem('players', JSON.stringify(sPlayers));
+      });
+  
+      this.setState({players: sPlayers, totalChipsTaken: sTotalInitialChipsTaken});
+      localStorage.setItem('players', JSON.stringify(sPlayers));
+    }    
 
   }
 
@@ -104,11 +109,16 @@ class App extends React.Component {
       alert('Player already registered');
     }
     else {
-      sPlayersList.push(sNewPlayerName);
-      sPlayers.push(sPlayerInfo);      
-      
-      this.setState({players: sPlayers, playersList: sPlayersList, totalChipsTaken: sTotalInitialChipsTaken});
-      localStorage.setItem('players', JSON.stringify(sPlayers));
+      if(sNewPlayerName.length < 1) {
+        alert('Player Name cannot be empty');
+      }
+      else {
+        sPlayersList.push(sNewPlayerName);
+        sPlayers.push(sPlayerInfo);      
+        
+        this.setState({players: sPlayers, playersList: sPlayersList, totalChipsTaken: sTotalInitialChipsTaken});
+        localStorage.setItem('players', JSON.stringify(sPlayers));
+      }
     }    
   }
 
@@ -118,19 +128,23 @@ class App extends React.Component {
     let sPlayersList = this.state.playersList;
     let sTotalInitialChipsTaken =  parseInt(this.state.totalChipsTaken);
 
-    for(var i=0; i<sPlayers.length; i++) {
-      if(sDeletePlayerName == sPlayers[i].player_name) {
-        sTotalInitialChipsTaken = sTotalInitialChipsTaken - (sPlayers[i].initial_chips + (sPlayers[i].later_buyins * parseInt(this.state.startChipCount)));
-        sPlayers.splice(i,1);
-      }
+    if(sDeletePlayerName.length < 1) {
+      alert("Select a player to remove.");
     }
-    
-    const sPlayersListFiltered = sPlayersList.filter(item => item !== sDeletePlayerName);
-
-    this.setState({players: sPlayers, playersList: sPlayersListFiltered, totalChipsTaken: sTotalInitialChipsTaken});
-
-    localStorage.setItem('players', JSON.stringify(sPlayers));
-
+    else {
+      for(var i=0; i<sPlayers.length; i++) {
+        if(sDeletePlayerName == sPlayers[i].player_name) {
+          sTotalInitialChipsTaken = sTotalInitialChipsTaken - (sPlayers[i].initial_chips + (sPlayers[i].later_buyins * parseInt(this.state.startChipCount)));
+          sPlayers.splice(i,1);
+        }
+      }
+      
+      const sPlayersListFiltered = sPlayersList.filter(item => item !== sDeletePlayerName);
+  
+      this.setState({players: sPlayers, playersList: sPlayersListFiltered, totalChipsTaken: sTotalInitialChipsTaken});
+  
+      localStorage.setItem('players', JSON.stringify(sPlayers));
+    }
   }
 
   calculatePayouts = () => {
@@ -513,6 +527,10 @@ class App extends React.Component {
         </div>
 
       </div>
+      <div className="footer-section">
+         <h3>&copy; Abhinay Kumar</h3>
+      </div>
+      
       </div>  
     );
   }
