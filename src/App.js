@@ -527,9 +527,6 @@ class App extends React.Component {
         </div>
 
       </div>
-      <div className="footer-section">
-         <h3>&copy; Abhinay Kumar</h3>
-      </div>
       
       </div>  
     );
